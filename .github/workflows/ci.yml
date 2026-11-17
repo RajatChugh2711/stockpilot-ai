@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, "chore/**", "feature/**", "fix/**"]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  web-and-api:
+    name: Web and API checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.3
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.5
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Prisma schema validation and client generation
+        env:
+          DATABASE_URL: postgresql://stockpilot:stockpilot_dev_only@localhost:5432/stockpilot?schema=public
+        run: pnpm db:generate
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build
+        run: pnpm build
+
+  analytics:
+    name: Analytics service checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r apps/analytics/requirements.txt
+      - name: Import application
+        working-directory: apps/analytics
+        run: python -c "from app.main import app; print(app.title)"

@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPPORT
+}
+
+enum InstrumentType {
+  EQUITY
+  ETF
+  INDEX
+}
+
+enum PriceBasis {
+  RAW
+  SPLIT_ADJUSTED
+  TOTAL_RETURN
+}
+
+enum IngestionStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  PARTIAL
+  FAILED
+}
+
+model User {
+  id           String        @id @default(uuid()) @db.Uuid
+  email        String        @unique @db.VarChar(320)
+  passwordHash String        @map("password_hash") @db.VarChar(255)
+  displayName  String?       @map("display_name") @db.VarChar(120)
+  role         UserRole      @default(USER)
+  active       Boolean       @default(true)
+  sessions     UserSession[]
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("users")
+}
+
+model UserSession {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  refreshTokenHash String    @map("refresh_token_hash") @db.VarChar(255)
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz(6)
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("user_sessions")
+}
+
+model Company {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String       @db.VarChar(255)
+  isin        String?      @unique @db.VarChar(12)
+  industry    String?      @db.VarChar(150)
+  description String?
+  instruments Instrument[]
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([name])
+  @@map("companies")
+}
+
+model Exchange {
+  id          String       @id @default(uuid()) @db.Uuid
+  code        String       @unique @db.VarChar(10)
+  name        String       @db.VarChar(100)
+  countryCode String       @default("IN") @map("country_code") @db.Char(2)
+  instruments Instrument[]
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("exchanges")
+}
+
+model Instrument {
+  id             String              @id @default(uuid()) @db.Uuid
+  companyId      String              @map("company_id") @db.Uuid
+  exchangeId     String              @map("exchange_id") @db.Uuid
+  symbol         String              @db.VarChar(50)
+  securityCode   String?             @map("security_code") @db.VarChar(30)
+  instrumentType InstrumentType      @default(EQUITY) @map("instrument_type")
+  currency       String              @default("INR") @db.Char(3)
+  active         Boolean             @default(true)
+  company        Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  exchange       Exchange             @relation(fields: [exchangeId], references: [id], onDelete: Restrict)
+  prices         MarketPrice[]
+  providerMaps   ProviderInstrument[]
+  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([exchangeId, symbol])
+  @@index([companyId])
+  @@map("instruments")
+}
+
+model DataProvider {
+  id             String               @id @default(uuid()) @db.Uuid
+  code           String               @unique @db.VarChar(50)
+  name           String               @db.VarChar(150)
+  enabled        Boolean              @default(false)
+  instrumentMaps ProviderInstrument[]
+  prices         MarketPrice[]
+  ingestionJobs  IngestionJob[]
+  createdAt      DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("data_providers")
+}
+
+model ProviderInstrument {
+  id                   String       @id @default(uuid()) @db.Uuid
+  providerId           String       @map("provider_id") @db.Uuid
+  instrumentId         String       @map("instrument_id") @db.Uuid
+  externalInstrumentId String       @map("external_instrument_id") @db.VarChar(120)
+  provider             DataProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  instrument           Instrument   @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+  createdAt            DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([providerId, externalInstrumentId])
+  @@unique([providerId, instrumentId])
+  @@map("provider_instruments")
+}
+
+model MarketPrice {
+  id           BigInt        @id @default(autoincrement())
+  instrumentId String        @map("instrument_id") @db.Uuid
+  providerId   String?       @map("provider_id") @db.Uuid
+  tradingDate  DateTime      @map("trading_date") @db.Date
+  interval     String        @default("1d") @db.VarChar(10)
+  priceBasis   PriceBasis    @default(RAW) @map("price_basis")
+  open         Decimal?      @db.Decimal(18, 4)
+  high         Decimal?      @db.Decimal(18, 4)
+  low          Decimal?      @db.Decimal(18, 4)
+  close        Decimal       @db.Decimal(18, 4)
+  volume       BigInt?
+  sourceAsOf   DateTime?     @map("source_as_of") @db.Timestamptz(6)
+  ingestedAt   DateTime      @default(now()) @map("ingested_at") @db.Timestamptz(6)
+  instrument   Instrument    @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+  provider     DataProvider? @relation(fields: [providerId], references: [id], onDelete: SetNull)
+
+  @@unique([instrumentId, tradingDate, interval, priceBasis])
+  @@index([instrumentId, tradingDate(sort: Desc)])
+  @@index([providerId, ingestedAt])
+  @@map("market_prices")
+}
+
+model IngestionJob {
+  id            String          @id @default(uuid()) @db.Uuid
+  providerId    String          @map("provider_id") @db.Uuid
+  dataType      String          @map("data_type") @db.VarChar(50)
+  status        IngestionStatus @default(QUEUED)
+  startedAt     DateTime?       @map("started_at") @db.Timestamptz(6)
+  finishedAt    DateTime?       @map("finished_at") @db.Timestamptz(6)
+  recordsRead   Int             @default(0) @map("records_read")
+  recordsStored Int             @default(0) @map("records_stored")
+  errorMessage  String?         @map("error_message")
+  provider      DataProvider    @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([providerId, createdAt(sort: Desc)])
+  @@map("ingestion_jobs")
+}
