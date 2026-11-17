@@ -129,6 +129,7 @@ The API health endpoint confirms process liveness. It does not yet verify databa
 - [Database design](docs/DATABASE_SCHEMA.md)
 - [API conventions](docs/API_CONVENTIONS.md)
 - [Market-data provider strategy](docs/DATA_PROVIDER_STRATEGY.md)
+- [Phase 1 market-data implementation plan](docs/PHASE_1_MARKET_DATA_PLAN.md)
 - [Analytics and forecasting methodology](docs/ANALYTICS_METHODOLOGY.md)
 - [Security requirements](docs/SECURITY.md)
 - [Contributing guide](CONTRIBUTING.md)
