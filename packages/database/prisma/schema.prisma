@@ -86,20 +86,20 @@ model Exchange {
 }
 
 model Instrument {
-  id             String              @id @default(uuid()) @db.Uuid
-  companyId      String              @map("company_id") @db.Uuid
-  exchangeId     String              @map("exchange_id") @db.Uuid
-  symbol         String              @db.VarChar(50)
-  securityCode   String?             @map("security_code") @db.VarChar(30)
-  instrumentType InstrumentType      @default(EQUITY) @map("instrument_type")
-  currency       String              @default("INR") @db.Char(3)
-  active         Boolean             @default(true)
-  company        Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  id             String               @id @default(uuid()) @db.Uuid
+  companyId      String               @map("company_id") @db.Uuid
+  exchangeId     String               @map("exchange_id") @db.Uuid
+  symbol         String               @db.VarChar(50)
+  securityCode   String?              @map("security_code") @db.VarChar(30)
+  instrumentType InstrumentType       @default(EQUITY) @map("instrument_type")
+  currency       String               @default("INR") @db.Char(3)
+  active         Boolean              @default(true)
+  company        Company              @relation(fields: [companyId], references: [id], onDelete: Restrict)
   exchange       Exchange             @relation(fields: [exchangeId], references: [id], onDelete: Restrict)
   prices         MarketPrice[]
   providerMaps   ProviderInstrument[]
-  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdAt      DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@unique([exchangeId, symbol])
   @@index([companyId])

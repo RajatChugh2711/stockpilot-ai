@@ -18,15 +18,15 @@ StockPilot AI is an India-focused research SaaS for NSE and BSE listed instrumen
 
 ## Technology
 
-| Area | Technology |
-|---|---|
-| Web | Next.js 16, React, TypeScript |
-| API | NestJS 12, TypeScript |
-| Analytics | Python, FastAPI |
-| Database | PostgreSQL 16, Prisma ORM 7 |
-| Cache/jobs | Redis, BullMQ (worker integration follows) |
-| Local infrastructure | Docker Compose |
-| CI | GitHub Actions |
+| Area                 | Technology                                 |
+| -------------------- | ------------------------------------------ |
+| Web                  | Next.js 16, React, TypeScript              |
+| API                  | NestJS 12, TypeScript                      |
+| Analytics            | Python, FastAPI                            |
+| Database             | PostgreSQL 16, Prisma ORM 7                |
+| Cache/jobs           | Redis, BullMQ (worker integration follows) |
+| Local infrastructure | Docker Compose                             |
+| CI                   | GitHub Actions                             |
 
 ## Monorepo layout
 
@@ -74,11 +74,13 @@ stockpilot-ai/
 3. Create your local environment file:
 
    PowerShell:
+
    ```powershell
    Copy-Item .env.example .env
    ```
 
    macOS/Linux:
+
    ```bash
    cp .env.example .env
    ```
@@ -112,13 +114,13 @@ stockpilot-ai/
 
 ## Local endpoints
 
-| Service | URL |
-|---|---|
-| Web dashboard | http://localhost:3000 |
-| API liveness | http://localhost:4000/api/v1/health |
-| API Swagger | http://localhost:4000/docs |
-| Analytics liveness | http://localhost:8000/health |
-| Analytics readiness | http://localhost:8000/ready |
+| Service             | URL                                 |
+| ------------------- | ----------------------------------- |
+| Web dashboard       | http://localhost:3000               |
+| API liveness        | http://localhost:4000/api/v1/health |
+| API Swagger         | http://localhost:4000/docs          |
+| Analytics liveness  | http://localhost:8000/health        |
+| Analytics readiness | http://localhost:8000/ready         |
 
 The API health endpoint confirms process liveness. It does not yet verify database or Redis connectivity.
 

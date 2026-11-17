@@ -22,6 +22,7 @@ Read [Data Provider Strategy](DATA_PROVIDER_STRATEGY.md) before implementing any
 No provider should be selected solely because an individual API key works or the public subscription price is low. Commercial web/mobile display, subscriber access, historical caching, derived analytics and report generation must all be explicitly permitted.
 
 Shortlist:
+
 - Direct NSE and BSE agreements as the authoritative baseline.
 - TrueData as the first unified-vendor quote request, subject to separate API approval and written SaaS rights.
 - DhanHQ partner programme as a secondary integration path, not an individual account token.
@@ -29,29 +30,34 @@ Shortlist:
 ## Implementation sequence
 
 ### 1. Provider contract and instrument master
+
 - Obtain written commercial permissions and pricing.
 - Import the permitted exchange/security master files.
 - Normalize company identity separately from each exchange listing.
 - Store provider instrument identifiers as mappings.
 
 ### 2. Provider-neutral API contract
+
 - Define interfaces for instrument search, daily history, latest quote and corporate actions.
 - Normalize timestamps to UTC for storage and retain exchange trading date in Asia/Kolkata.
 - Keep vendor-specific payloads inside adapters.
 
 ### 3. Historical ingestion
+
 - Backfill daily OHLCV for the agreed instrument universe and period.
 - Use idempotent upserts and bounded rate limits.
 - Persist source provider, source-as-of, ingestion time and price basis.
 - Quarantine invalid bars rather than silently repairing them.
 
 ### 4. Read API and UI
+
 - Add company/instrument search endpoints.
 - Add daily history and latest-quote endpoints with pagination/window limits.
 - Show data provider, delay/freshness and as-of timestamp in the dashboard.
 - Render missing data explicitly; never fill gaps with fabricated values.
 
 ### 5. Verification
+
 - Validate the adapter against the provider's sample files/responses.
 - Reconcile selected instruments against exchange/provider reference outputs.
 - Test holidays, suspensions, symbol changes, duplicate bars and missing sessions.

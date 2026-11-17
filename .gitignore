@@ -35,3 +35,5 @@ tmp/
 !.vscode/extensions.json
 .idea/
 *.swp
+*.tsbuildinfo
+docker-compose.override.yml

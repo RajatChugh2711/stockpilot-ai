@@ -1,0 +1,2 @@
+-- RenameIndex
+ALTER INDEX "market_prices_instrument_id_trading_date_interval_price_basis_k" RENAME TO "market_prices_instrument_id_trading_date_interval_price_bas_key";
