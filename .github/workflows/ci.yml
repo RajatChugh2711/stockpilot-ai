@@ -11,8 +11,24 @@ permissions:
 
 jobs:
   web-and-api:
-    name: Web and API checks
+    name: Web, API and database checks
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: stockpilot
+          POSTGRES_USER: stockpilot
+          POSTGRES_PASSWORD: stockpilot_dev_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U stockpilot -d stockpilot"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://stockpilot:stockpilot_dev_only@localhost:5432/stockpilot?schema=public
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,10 +39,10 @@ jobs:
           version: 9.15.5
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
-      - name: Prisma schema validation and client generation
-        env:
-          DATABASE_URL: postgresql://stockpilot:stockpilot_dev_only@localhost:5432/stockpilot?schema=public
+      - name: Generate Prisma client
         run: pnpm db:generate
+      - name: Apply migrations to temporary PostgreSQL
+        run: pnpm db:migrate:deploy
       - name: Typecheck
         run: pnpm typecheck
       - name: Build
