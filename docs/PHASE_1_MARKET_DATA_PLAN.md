@@ -26,6 +26,15 @@ Shortlist:
 - TrueData as the first unified-vendor quote request, subject to separate API approval and written SaaS rights.
 - DhanHQ partner programme as a secondary integration path, not an individual account token.
 
+## Contract work started
+
+The first Phase 1 branch adds a provider-neutral NestJS contract for instrument search, daily history, latest quotes and corporate actions. It also adds:
+- A provider registry that rejects duplicate provider codes.
+- A `GET /api/v1/market-data/providers` endpoint.
+- Daily OHLCV validation using decimal-safe comparisons and timezone-aware source timestamps.
+
+The endpoint currently reports `not_configured` because no provider has been licensed or connected. This is intentional.
+
 ## Implementation sequence
 
 ### 1. Provider contract and instrument master

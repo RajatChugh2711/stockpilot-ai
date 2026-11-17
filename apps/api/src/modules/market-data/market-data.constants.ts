@@ -1,0 +1,1 @@
+export const MARKET_DATA_PROVIDERS = Symbol('MARKET_DATA_PROVIDERS');

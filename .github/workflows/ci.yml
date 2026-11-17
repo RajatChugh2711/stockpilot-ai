@@ -47,6 +47,8 @@ jobs:
         run: pnpm typecheck
       - name: Build
         run: pnpm build
+      - name: API unit tests
+        run: pnpm --filter @stockpilot/api test
 
   analytics:
     name: Analytics service checks

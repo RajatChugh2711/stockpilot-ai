@@ -18,8 +18,8 @@
 - [x] Redis local infrastructure
 - [x] Environment example and secret hygiene
 - [ ] Local runtime verification
-- [ ] Database migration generated and tested
-- [ ] CI workflows and automated checks
+- [x] Database migration generated and tested
+- [x] CI workflows and automated checks
 - [ ] Authentication implementation
 
 **Exit gate:** local stack boots, health checks pass, migration applies cleanly, lint/type checks/build pass, and setup instructions are reproducible.
@@ -29,7 +29,7 @@
 - [ ] Provider licensing and commercial-use review
 - [ ] NSE/BSE exchange and instrument reference data
 - [ ] Issuer-to-instrument mapping
-- [ ] Provider adapter interface
+- [x] Provider adapter interface and empty-provider registry
 - [ ] Historical OHLCV ingestion
 - [ ] Data provenance and freshness
 - [ ] Validation, quarantine and reconciliation
