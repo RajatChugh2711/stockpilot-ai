@@ -8,6 +8,7 @@
     "dev": "pnpm --parallel --filter @stockpilot/web --filter @stockpilot/api dev",
     "build": "pnpm --recursive --if-present build",
     "typecheck": "pnpm --recursive --if-present typecheck",
+    "test": "pnpm --filter @stockpilot/api build && pnpm --filter @stockpilot/api test",
     "lint": "prettier --check \"**/*.{md,json,yml,yaml,ts,tsx,css,prisma}\"",
     "format": "prettier --write \"**/*.{md,json,yml,yaml,ts,tsx,css,prisma}\"",
     "infra:up": "docker compose up -d postgres redis analytics",

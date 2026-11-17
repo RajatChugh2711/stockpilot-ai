@@ -117,10 +117,21 @@ stockpilot-ai/
 | Web dashboard | http://localhost:3000 |
 | API liveness | http://localhost:4000/api/v1/health |
 | API Swagger | http://localhost:4000/docs |
+| Market-data provider status | http://localhost:4000/api/v1/market-data/providers |
 | Analytics liveness | http://localhost:8000/health |
 | Analytics readiness | http://localhost:8000/ready |
 
 The API health endpoint confirms process liveness. It does not yet verify database or Redis connectivity.
+
+## Validation
+
+```bash
+pnpm typecheck
+pnpm build
+pnpm test
+```
+
+The API unit tests validate the normalized daily OHLCV contract. The CI workflow also applies the initial Prisma migration to a temporary PostgreSQL 16 instance.
 
 ## Project documentation
 

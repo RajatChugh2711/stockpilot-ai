@@ -6,7 +6,8 @@
     "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/market-data-bar.validator.spec.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.5.1",
