@@ -1,50 +1,151 @@
 # StockPilot AI
 
-AI-powered stock-market research and investment intelligence for Indian markets.
+**AI-powered stock-market research and investment intelligence for Indian markets.**
 
-> **Status:** Foundation in progress. Market data, company analysis and forecasting are not implemented yet. No live prices or forecast-accuracy claims are provided.
+StockPilot AI is an India-focused research SaaS for NSE and BSE listed instruments. It is being developed to bring market history, company fundamentals, technical analytics, probabilistic scenarios, IPO research and portfolio tracking into one workspace.
 
-## Principles
-- Separate issuer records from exchange-listed instruments.
+> **Development status:** Foundation in progress. Market-data, company-analysis and forecast capabilities are not connected to a live provider yet. No live market prices or forecast-accuracy claims are presented.
+
+## Product principles
+
+- Separate issuer/company records from exchange-listed instruments.
 - Preserve source provenance and data-as-of timestamps.
-- Keep raw prices distinct from adjusted return series.
-- Calculate financial metrics deterministically; use AI to explain verified outputs.
+- Keep raw market prices distinct from adjusted return series.
+- Calculate financial metrics deterministically; use AI only to explain verified outputs.
 - Treat forecasts as uncertain distributions, never guaranteed targets.
-- Obtain explicit commercial data rights before displaying or redistributing market data.
-- Never commit credentials, customer data or licensed datasets.
+- Respect market-data licensing before storing, displaying or redistributing source data.
+- Never commit API keys, credentials, customer data or licensed datasets.
 
-## Planned architecture
-| Component | Responsibility | Stack |
-|---|---|---|
-| `apps/web` | Investor web application | Next.js, React, TypeScript |
-| `apps/api` | Product API | NestJS, TypeScript |
-| `apps/analytics` | Quantitative research | Python, FastAPI |
-| Database | Canonical application and financial records | PostgreSQL, Prisma |
-| Jobs/cache | Background work and caching | Redis, BullMQ |
-| Infrastructure | Local development and deployment | Docker, AWS (planned) |
+## Technology
 
-## Layout
+| Area                 | Technology                                 |
+| -------------------- | ------------------------------------------ |
+| Web                  | Next.js 16, React, TypeScript              |
+| API                  | NestJS 12, TypeScript                      |
+| Analytics            | Python, FastAPI                            |
+| Database             | PostgreSQL 16, Prisma ORM 7                |
+| Cache/jobs           | Redis, BullMQ (worker integration follows) |
+| Local infrastructure | Docker Compose                             |
+| CI                   | GitHub Actions                             |
+
+## Monorepo layout
+
 ```text
 stockpilot-ai/
-  apps/{web,api,analytics}/
-  packages/{shared-types,api-client,ui,config}/
-  docs/
-  infrastructure/{docker,aws,scripts}/
-  .github/{workflows,ISSUE_TEMPLATE}/
+├── apps/
+│   ├── web/                 # Next.js investor-facing application
+│   ├── api/                 # NestJS API and Swagger
+│   └── analytics/           # Internal FastAPI service
+├── packages/
+│   ├── database/            # Prisma schema and migrations
+│   └── shared-types/        # Shared TypeScript contracts
+├── docs/                    # Product and engineering documentation
+├── infrastructure/          # Deployment assets (future)
+├── .github/workflows/       # CI workflows
+├── docker-compose.yml
+├── pnpm-workspace.yaml
+└── package.json
 ```
 
-## Documentation
-- [Roadmap](docs/ROADMAP.md)
-- [Architecture](docs/ARCHITECTURE.md)
+## Prerequisites
+
+- Node.js 22.22.3
+- Corepack and pnpm 9.15.5
+- Python 3.11+ (only needed to run analytics outside Docker)
+- Docker Desktop / Docker Engine with Compose
+
+## Local setup
+
+1. Clone the repository and switch to the foundation branch:
+
+   ```bash
+   git clone https://github.com/RajatChugh2711/stockpilot-ai.git
+   cd stockpilot-ai
+   git checkout chore/phase-0-foundation
+   ```
+
+2. Enable Corepack and activate the pinned package manager:
+
+   ```bash
+   corepack enable
+   corepack prepare pnpm@9.15.5 --activate
+   ```
+
+3. Create your local environment file:
+
+   PowerShell:
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+   macOS/Linux:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Install packages. This creates `pnpm-lock.yaml`; commit that generated lockfile so installs become reproducible:
+
+   ```bash
+   pnpm install
+   ```
+
+5. Start PostgreSQL, Redis and the analytics service:
+
+   ```bash
+   pnpm infra:up
+   ```
+
+6. Generate the Prisma client and apply the initial development migration:
+
+   ```bash
+   pnpm db:generate
+   pnpm db:migrate:dev
+   ```
+
+   Run migrations manually against a development database. Do not run migration commands against production without review and an approved release procedure.
+
+7. Start the web application and API:
+
+   ```bash
+   pnpm dev
+   ```
+
+## Local endpoints
+
+| Service             | URL                                 |
+| ------------------- | ----------------------------------- |
+| Web dashboard       | http://localhost:3000               |
+| API liveness        | http://localhost:4000/api/v1/health |
+| API Swagger         | http://localhost:4000/docs          |
+| Analytics liveness  | http://localhost:8000/health        |
+| Analytics readiness | http://localhost:8000/ready         |
+
+The API health endpoint confirms process liveness. It does not yet verify database or Redis connectivity.
+
+## Project documentation
+
+- [Roadmap and phase exit gates](docs/ROADMAP.md)
+- [Technical architecture](docs/ARCHITECTURE.md)
 - [Database design](docs/DATABASE_SCHEMA.md)
 - [API conventions](docs/API_CONVENTIONS.md)
-- [Provider strategy](docs/DATA_PROVIDER_STRATEGY.md)
-- [Analytics methodology](docs/ANALYTICS_METHODOLOGY.md)
-- [Security](docs/SECURITY.md)
-- [Contributing](CONTRIBUTING.md)
+- [Market-data provider strategy](docs/DATA_PROVIDER_STRATEGY.md)
+- [Phase 1 market-data implementation plan](docs/PHASE_1_MARKET_DATA_PLAN.md)
+- [Analytics and forecasting methodology](docs/ANALYTICS_METHODOLOGY.md)
+- [Security requirements](docs/SECURITY.md)
+- [Contributing guide](CONTRIBUTING.md)
 
-## Principles and launch gates
-StockPilot AI is a financial research and decision-support product, not a source of guaranteed returns. Market data features require licensing for the exact SaaS display, storage and derived-use case. Forecasting will require documented out-of-sample evaluation before being presented to users.
+## Development status
+
+Phase 0 establishes the repository, app shells, API documentation, analytics health endpoints, initial data-domain schema and local infrastructure. It does not yet implement authentication flows, a live provider integration, company search, historical market-data ingestion or forecasts.
+
+Phase 1 starts only after the provider's commercial rights for the intended storage, display and derived use have been confirmed.
+
+## Financial and data disclaimer
+
+StockPilot AI is intended as a financial research and decision-support platform. Historical performance does not guarantee future results. Forecasts, once implemented, will be probabilistic estimates with disclosed methodology and limitations. The product will not claim guaranteed profits. Commercial launch is subject to market-data licensing and appropriate legal/compliance review in India.
 
 ## License
-No open-source license has been granted. All rights reserved unless and until a license is added.
+
+No open-source license has been granted. All rights are reserved unless and until a separate license is added.

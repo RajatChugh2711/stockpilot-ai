@@ -1,0 +1,26 @@
+{
+  "name": "stockpilot-ai",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.5",
+  "engines": {
+    "node": ">=22.22.3 <23"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @stockpilot/web --filter @stockpilot/api dev",
+    "build": "pnpm --recursive --if-present build",
+    "typecheck": "pnpm --recursive --if-present typecheck",
+    "lint": "prettier --check \"**/*.{md,json,yml,yaml,ts,tsx,css}\"",
+    "format": "prettier --write \"**/*.{md,json,yml,yaml,ts,tsx,css}\"",
+    "infra:up": "docker compose up -d postgres redis analytics",
+    "infra:down": "docker compose down",
+    "infra:logs": "docker compose logs -f",
+    "db:generate": "pnpm --filter @stockpilot/database db:generate",
+    "db:migrate:dev": "pnpm --filter @stockpilot/database db:migrate:dev",
+    "db:migrate:deploy": "pnpm --filter @stockpilot/database db:migrate:deploy",
+    "db:studio": "pnpm --filter @stockpilot/database db:studio"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2"
+  }
+}
