@@ -7,7 +7,7 @@
     "build": "nest build",
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit",
-    "test": "node --test test/market-data-bar.validator.spec.js"
+    "test": "node --test test/*.spec.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.5.1",
@@ -17,6 +17,7 @@
     "@nestjs/swagger": "^12.1.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "pg": "^8.13.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -24,6 +25,7 @@
     "@nestjs/cli": "^12.0.13",
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.14",
+    "@types/pg": "^8.11.10",
     "typescript": "6.0.3"
   }
 }

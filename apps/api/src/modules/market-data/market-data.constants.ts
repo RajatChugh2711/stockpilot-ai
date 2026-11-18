@@ -1,1 +1,2 @@
 export const MARKET_DATA_PROVIDERS = Symbol('MARKET_DATA_PROVIDERS');
+export const MARKET_DATA_DB_POOL = Symbol('MARKET_DATA_DB_POOL');

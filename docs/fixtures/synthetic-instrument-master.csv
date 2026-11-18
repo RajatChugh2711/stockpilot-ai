@@ -1,0 +1,4 @@
+exchange,symbol,company_name,isin,security_code,instrument_type,currency
+NSE,SYNALPHA,"Synthetic Alpha, Ltd",INZZZZZZZZZ1,900001,EQUITY,INR
+BSE,900001,"Synthetic Alpha, Ltd",INZZZZZZZ1,900001,EQUITY,INR
+NSE,SYNBETA,Synthetic Beta Energy Ltd,,900002,EQUITY,INR
