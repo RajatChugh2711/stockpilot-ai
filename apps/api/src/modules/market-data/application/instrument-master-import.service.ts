@@ -79,10 +79,10 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
     const runId = randomUUID();
 
     await this.pool.query(
-      \`INSERT INTO instrument_import_runs (
+      `INSERT INTO instrument_import_runs (
         id, exchange_code, source_name, source_file_name, source_reference,
         file_sha256, status, dry_run, started_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, 'DRY_RUN'::"InstrumentImportStatus", $7, NOW())\`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, 'DRY_RUN'::"InstrumentImportStatus", $7, NOW())`,
       [
         runId,
         input.exchangeCode ?? null,
@@ -150,10 +150,10 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
           }
 
           const conflictingListing = await client.query<{ symbol: string }>(
-            \`SELECT symbol
+            `SELECT symbol
              FROM instruments
              WHERE exchange_id = $1 AND isin = $2 AND symbol <> $3
-             LIMIT 1\`,
+             LIMIT 1`,
             [exchangeId, row.isin, row.symbol],
           );
 
@@ -170,10 +170,10 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
         }
 
         const existingResult = await client.query<ExistingInstrument>(
-          \`SELECT id, company_id, isin
+          `SELECT id, company_id, isin
            FROM instruments
            WHERE exchange_id = $1 AND symbol = $2
-           LIMIT 1\${dryRun ? '' : ' FOR UPDATE'}\`,
+           LIMIT 1\${dryRun ? '' : ' FOR UPDATE'}`,
           [exchangeId, row.symbol],
         );
         const existing = existingResult.rows[0];
@@ -212,7 +212,7 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
         if (existing) {
           if (!dryRun) {
             await client.query(
-              \`UPDATE instruments
+              `UPDATE instruments
                SET isin = COALESCE(isin, $2),
                    security_code = COALESCE($3, security_code),
                    instrument_type = $4::"InstrumentType",
@@ -226,7 +226,7 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
                    OR instrument_type IS DISTINCT FROM $4::"InstrumentType"
                    OR currency IS DISTINCT FROM $5
                    OR active IS DISTINCT FROM TRUE
-                 )\`,
+                 )`,
               [
                 existing.id,
                 row.isin,
@@ -250,8 +250,8 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
           companyId = randomUUID();
           if (!dryRun) {
             await client.query(
-              \`INSERT INTO companies (id, name, created_at, updated_at)
-               VALUES ($1, $2, NOW(), NOW())\`,
+              `INSERT INTO companies (id, name, created_at, updated_at)
+               VALUES ($1, $2, NOW(), NOW())`,
               [companyId, row.companyName],
             );
           }
@@ -263,12 +263,12 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
 
         if (!dryRun) {
           await client.query(
-            \`INSERT INTO instruments (
+            `INSERT INTO instruments (
               id, company_id, exchange_id, symbol, isin, security_code,
               instrument_type, currency, active, created_at, updated_at
             ) VALUES (
               $1, $2, $3, $4, $5, $6, $7::"InstrumentType", $8, TRUE, NOW(), NOW()
-            )\`,
+            )`,
             [
               randomUUID(),
               companyId,
@@ -309,7 +309,7 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
       } else {
         await this.persistIssues(client, runId, issues);
         await client.query(
-          \`UPDATE instrument_import_runs
+          `UPDATE instrument_import_runs
            SET status = $2::"InstrumentImportStatus",
                records_read = $3,
                records_valid = $4,
@@ -317,7 +317,7 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
                records_updated = $6,
                records_rejected = $7,
                finished_at = NOW()
-           WHERE id = $1\`,
+           WHERE id = $1`,
           [
             runId,
             status,
@@ -393,10 +393,10 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
       exchangeId = result.rows[0]?.id ?? randomUUID();
     } else {
       const result = await client.query<{ id: string }>(
-        \`INSERT INTO exchanges (id, code, name, country_code, created_at)
+        `INSERT INTO exchanges (id, code, name, country_code, created_at)
          VALUES ($1, $2, $3, 'IN', NOW())
          ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name
-         RETURNING id\`,
+         RETURNING id`,
         [randomUUID(), exchangeCode, exchangeName],
       );
       exchangeId = result.rows[0].id;
@@ -460,9 +460,9 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
   ): Promise<void> {
     for (const issue of issues) {
       await client.query(
-        \`INSERT INTO instrument_import_issues (
+        `INSERT INTO instrument_import_issues (
           id, import_run_id, row_number, error_code, message, raw_row, created_at
-        ) VALUES ($1, $2, $3, $4, $5, $6::jsonb, NOW())\`,
+        ) VALUES ($1, $2, $3, $4, $5, $6::jsonb, NOW())`,
         [
           randomUUID(),
           runId,
@@ -490,7 +490,7 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
   ): Promise<void> {
     await this.persistIssues(client, runId, result.issues);
     await client.query(
-      \`UPDATE instrument_import_runs
+      `UPDATE instrument_import_runs
        SET status = $2::"InstrumentImportStatus",
            records_read = $3,
            records_valid = $4,
@@ -498,7 +498,7 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
            records_updated = $6,
            records_rejected = $7,
            finished_at = NOW()
-       WHERE id = $1\`,
+       WHERE id = $1`,
       [
         runId,
         result.status,
@@ -513,11 +513,11 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
 
   private async finishFailedRun(runId: string, message: string): Promise<void> {
     await this.pool.query(
-      \`UPDATE instrument_import_runs
+      `UPDATE instrument_import_runs
        SET status = 'FAILED'::"InstrumentImportStatus",
            error_message = $2,
            finished_at = NOW()
-       WHERE id = $1\`,
+       WHERE id = $1`,
       [runId, message.slice(0, 2_000)],
     );
   }
