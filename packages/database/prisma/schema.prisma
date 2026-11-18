@@ -33,6 +33,13 @@ enum IngestionStatus {
   FAILED
 }
 
+enum InstrumentImportStatus {
+  DRY_RUN
+  SUCCEEDED
+  PARTIAL
+  FAILED
+}
+
 model User {
   id           String        @id @default(uuid()) @db.Uuid
   email        String        @unique @db.VarChar(320)
@@ -63,7 +70,6 @@ model UserSession {
 model Company {
   id          String       @id @default(uuid()) @db.Uuid
   name        String       @db.VarChar(255)
-  isin        String?      @unique @db.VarChar(12)
   industry    String?      @db.VarChar(150)
   description String?
   instruments Instrument[]
@@ -90,6 +96,7 @@ model Instrument {
   companyId      String              @map("company_id") @db.Uuid
   exchangeId     String              @map("exchange_id") @db.Uuid
   symbol         String              @db.VarChar(50)
+  isin           String?             @db.VarChar(12)
   securityCode   String?             @map("security_code") @db.VarChar(30)
   instrumentType InstrumentType      @default(EQUITY) @map("instrument_type")
   currency       String              @default("INR") @db.Char(3)
@@ -103,6 +110,7 @@ model Instrument {
 
   @@unique([exchangeId, symbol])
   @@index([companyId])
+  @@index([isin])
   @@map("instruments")
 }
 
@@ -171,4 +179,44 @@ model IngestionJob {
 
   @@index([providerId, createdAt(sort: Desc)])
   @@map("ingestion_jobs")
+}
+
+
+model InstrumentImportRun {
+  id             String                @id @default(uuid()) @db.Uuid
+  exchangeCode   String?               @map("exchange_code") @db.VarChar(10)
+  sourceName     String                @map("source_name") @db.VarChar(150)
+  sourceFileName String                @map("source_file_name") @db.VarChar(255)
+  sourceReference String?              @map("source_reference")
+  fileSha256     String                @map("file_sha256") @db.Char(64)
+  status         InstrumentImportStatus @default(DRY_RUN)
+  dryRun         Boolean               @default(true) @map("dry_run")
+  recordsRead    Int                   @default(0) @map("records_read")
+  recordsValid   Int                   @default(0) @map("records_valid")
+  recordsInserted Int                  @default(0) @map("records_inserted")
+  recordsUpdated Int                   @default(0) @map("records_updated")
+  recordsRejected Int                  @default(0) @map("records_rejected")
+  startedAt      DateTime              @default(now()) @map("started_at") @db.Timestamptz(6)
+  finishedAt     DateTime?             @map("finished_at") @db.Timestamptz(6)
+  errorMessage   String?               @map("error_message")
+  issues         InstrumentImportIssue[]
+  createdAt      DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([exchangeCode, createdAt(sort: Desc)])
+  @@map("instrument_import_runs")
+}
+
+model InstrumentImportIssue {
+  id          String             @id @default(uuid()) @db.Uuid
+  importRunId String             @map("import_run_id") @db.Uuid
+  rowNumber   Int                @map("row_number")
+  errorCode   String             @map("error_code") @db.VarChar(80)
+  message     String
+  rawRow      Json?              @map("raw_row")
+  importRun   InstrumentImportRun @relation(fields: [importRunId], references: [id], onDelete: Cascade)
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([importRunId, rowNumber])
+  @@map("instrument_import_issues")
 }
