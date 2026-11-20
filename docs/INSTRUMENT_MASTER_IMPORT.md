@@ -18,7 +18,7 @@ BSE,900001,"Synthetic Alpha, Ltd",INZZZZZZZ1,900001,EQUITY,INR
 
 The example above is fabricated test data. It is not an exchange record and must never be used as production market data.
 
-exchange accepts NSE or BSE. instrument_type accepts EQUITY, ETF or INDEX. isin and security_code may be empty. Empty currency defaults to INR. Indian ISIN values must have 12 characters and start with IN.
+exchange accepts NSE or BSE. instrument_type accepts EQUITY, ETF or INDEX. security_code may be empty. ISIN may be empty only when updating an exact existing exchange-symbol listing; a new listing without ISIN is rejected. Empty currency defaults to INR. Indian ISIN values must have 12 characters and start with IN.
 
 CSV supports quoted values, commas inside quoted values, escaped double quotes, UTF-8 BOM and CRLF/LF line endings. Unknown columns and malformed CSV structure fail the file. Invalid individual rows are rejected and written to the import issue log.
 
