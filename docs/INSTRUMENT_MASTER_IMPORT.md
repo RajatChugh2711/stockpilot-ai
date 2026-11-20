@@ -30,7 +30,7 @@ CSV supports quoted values, commas inside quoted values, escaped double quotes, 
 - Company names are never used for fuzzy matching or automatic merging.
 - If an ISIN maps to multiple companies, the row is rejected for manual review.
 - If a symbol already has a different ISIN, or the ISIN conflicts with the existing issuer mapping, the row is rejected.
-- A row without ISIN can update an exact existing exchange-symbol listing. A new no-ISIN listing gets its own Company record because there is no safe cross-listing identity key.
+- A row without ISIN can update an exact existing exchange-symbol listing. A new listing without ISIN is rejected with `MISSING_ISIN_FOR_NEW_LISTING`; it must be manually mapped or enriched with an ISIN before import.
 
 The importer does not overwrite an existing company name from a new file. It can fill a previously missing ISIN and update listing metadata.
 

@@ -3,7 +3,6 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
-  OnModuleDestroy,
 } from '@nestjs/common';
 import { createHash, randomUUID } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
@@ -59,15 +58,11 @@ interface CompanyLookup {
 }
 
 @Injectable()
-export class InstrumentMasterImportService implements OnModuleDestroy {
+export class InstrumentMasterImportService {
   constructor(
     @Inject(MARKET_DATA_DB_POOL)
     private readonly pool: Pool,
   ) {}
-
-  async onModuleDestroy(): Promise<void> {
-    await this.pool.end();
-  }
 
   async importCsv(
     input: ImportInstrumentMasterInput,
@@ -177,6 +172,17 @@ export class InstrumentMasterImportService implements OnModuleDestroy {
           [exchangeId, row.symbol],
         );
         const existing = existingResult.rows[0];
+
+        if (!existing && !row.isin) {
+          issues.push(
+            this.issueForRow(
+              row,
+              'MISSING_ISIN_FOR_NEW_LISTING',
+              'A new listing requires an ISIN for safe issuer mapping; rows without an ISIN can only update an existing exchange-symbol listing',
+            ),
+          );
+          continue;
+        }
 
         if (
           existing &&
